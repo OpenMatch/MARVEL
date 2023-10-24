@@ -3,7 +3,7 @@ There are source codes for [Unlock Multi-Modal Capability of Dense Retrieval via
 
 Click the links below to view our papers, checkpoints and datasets
 
-<a href=''><img src='https://img.shields.io/badge/Paper-Arxiv-red'></a><a href='https://arxiv.org/abs/2310.14037'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_DPR-blue'></a><a href=''><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_DPR-blue'></a><a href=''><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_ANCE-blue'></a><a href=''><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_ANCE-blue'></a><a href=''><img src='https://img.shields.io/badge/Google Drive-Dataset-yellow'></a> 
+<a href='https://arxiv.org/abs/2310.14037'><img src='https://img.shields.io/badge/Paper-Arxiv-red'></a><a href=''><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_DPR-blue'></a><a href=''><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_DPR-blue'></a><a href=''><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_ANCE-blue'></a><a href=''><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_ANCE-blue'></a><a href=''><img src='https://img.shields.io/badge/Google Drive-Dataset-yellow'></a> 
 
 
 ## Requirement
