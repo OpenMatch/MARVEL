@@ -1,9 +1,9 @@
 #  Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin (MARVEL)
 Source code for our paper : [Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin](https://arxiv.org/abs/2310.14037)
 
-Click the links below to view our papers, checkpoints and datasets
+Click the links below to view our papers and checkpoints
 
-<a href='https://arxiv.org/abs/2310.14037'><img src='https://img.shields.io/badge/Paper-Arxiv-red'></a><a href='https://huggingface.co/OpenMatch/marvel-dpr-webqa'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_DPR-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-dpr-clueweb'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_DPR-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-ance-webqa'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_ANCE-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-ance-clueweb'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_ANCE-blue'></a><a href=''><img src='https://img.shields.io/badge/Google Drive-Dataset-yellow'></a> 
+<a href='https://arxiv.org/abs/2310.14037'><img src='https://img.shields.io/badge/Paper-Arxiv-red'></a><a href='https://huggingface.co/OpenMatch/marvel-dpr-webqa'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_DPR-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-dpr-clueweb'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_DPR-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-ance-webqa'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_ANCE-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-ance-clueweb'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_ANCE-blue'></a>
 
  If you find this work useful, please cite our paper  and give us a shining star 🌟
 
@@ -35,7 +35,8 @@ MARVEL is built on [CLIP](https://huggingface.co/openai/clip-vit-base-patch32) a
 git clone https://github.com/OpenMatch/MARVEL
 cd MARVEL
 ```
-* Next, download our processed dataset from the [Google Drive](), please make sure that the files under the data folder contain the following before running:
+* Download link for our WebQA: [WebQA](https://thunlp.oss-cn-qingdao.aliyuncs.com/UniVLDR/data.zip). If you want to use our ClueWeb22-MM, please obtain ClueWeb license first and contact us by email.
+* Please make sure that the files under the data folder contain the following before running:
 ```
 data/
 ├──WebQA/
