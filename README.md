@@ -56,7 +56,7 @@ data/
     └── image.parquet
 ```
 ### Train MARVEL-ANCE
-**Using the WebQA dataset as an example, I will show you how to reproduce the results in the MARVEL paper.**
+**Using the WebQA dataset as an example, I will show you how to reproduce the results in the MARVEL paper. The same is true for the ClueWeb22-MM dataset.**
 
 * First step: Go to the ``DPR/WebQA`` folder and train MARVEL-DPR using inbatch negatives:
 ```
