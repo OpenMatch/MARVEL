@@ -1,13 +1,15 @@
 #  Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin (MARVEL)
-There are source codes for [Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin](https://arxiv.org/abs/2310.14037).
+Source code for our paper : [Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin](https://arxiv.org/abs/2310.14037).
 
 Click the links below to view our papers, checkpoints and datasets
 
 <a href='https://arxiv.org/abs/2310.14037'><img src='https://img.shields.io/badge/Paper-Arxiv-red'></a><a href='https://huggingface.co/OpenMatch/marvel-dpr-webqa'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_DPR-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-dpr-clueweb'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_DPR-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-ance-webqa'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_ANCE-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-ance-clueweb'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_ANCE-blue'></a><a href=''><img src='https://img.shields.io/badge/Google Drive-Dataset-yellow'></a> 
 
+ If you find this work useful, please cite our paper  and give us a shining star 🌟
+
 
 ## Requirement
-**Install the following packages using Pip or Conda under this environment**
+**1. Install the following packages using Pip or Conda under this environment**
 
 ```
 Python==3.7
@@ -22,8 +24,9 @@ Install the pytrec_eval from https://github.com/cvangysel/pytrec_eval
 ```
 We provide the version file `requirements.txt` of all our used packages, if you have any problems configuring the environment, please refer to this document.
 
-## Prepare the pretrained CLIP and T5-ANCE
-* MARVEL is built on [CLIP](https://huggingface.co/openai/clip-vit-base-patch32) and [T5-ANCE](https://huggingface.co/OpenMatch/t5-ance) model.
+**2. Prepare the pretrained CLIP and T5-ANCE**
+
+MARVEL is built on [CLIP](https://huggingface.co/openai/clip-vit-base-patch32) and [T5-ANCE](https://huggingface.co/OpenMatch/t5-ance) model.
 
 ## Reproduce MARVEL
 ### Download Code & Dataset
