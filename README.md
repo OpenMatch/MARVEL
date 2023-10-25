@@ -1,5 +1,5 @@
 #  Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin (MARVEL)
-Source code for our paper : [Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin](https://arxiv.org/abs/2310.14037).
+Source code for our paper : [Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin](https://arxiv.org/abs/2310.14037)
 
 Click the links below to view our papers, checkpoints and datasets
 
