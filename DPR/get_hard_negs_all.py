@@ -1,0 +1,131 @@
+import sys
+import csv
+from tqdm import tqdm
+import collections
+import gzip
+import pickle
+import faiss
+import os
+import logging
+import argparse
+import json
+import os.path as op
+import numpy as np
+import pyarrow as pa
+import pyarrow.parquet as pq
+import pandas as pd
+logger = logging.getLogger()
+import random
+from msmarco_eval import quality_checks_qids, compute_metrics, load_reference
+
+
+
+def load_file(path):
+    all_data = {}
+    if "clueweb" in path.lower():
+        input_data = pd.read_parquet(path)
+        for index in range(len(input_data)):
+            example = input_data.iloc[index]
+            example = example.to_dict()
+            all_data[example['qid']] = example
+    elif "webqa" in path.lower():
+        with open(path) as fin:
+            for line in fin:
+                example = json.loads(line.strip())
+                all_data[example['qid']] = example
+    else:
+        raise ("The path of data is error!")
+    return all_data
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser("")
+    parser.add_argument("--query_embed_path")
+    parser.add_argument("--txt_embed_path")
+    parser.add_argument("--img_embed_path")
+    parser.add_argument("--data_path", default='')
+    parser.add_argument("--out_path")
+
+    parser.add_argument("--dim", type=int, default=768)
+    parser.add_argument("--topN", type=int, default=100)
+    parser.add_argument("--max_neg", type=int, default=100)
+
+
+    args = parser.parse_args()
+
+
+    handlers = [logging.StreamHandler()]
+    logging.basicConfig(format='[%(asctime)s] %(levelname)s: %(message)s', level=logging.DEBUG,
+                        datefmt='%d-%m-%Y %H:%M:%S', handlers=handlers)
+    logger.info(args)
+    all_idx = []
+    all_embeds = []
+    faiss.omp_set_num_threads(16)
+    cpu_index = faiss.IndexFlatIP(args.dim)
+
+
+    with open(args.query_embed_path, 'rb') as fin:
+        logger.info("load data from {}".format(args.query_embed_path))
+        query_idx, query_embeds = pickle.load(fin)
+        query_embeds = np.array(query_embeds, np.float32)
+    data_dict = load_file(args.data_path)
+    if args.txt_embed_path:
+        logger.info("load data from {}".format(args.txt_embed_path))
+        with open(args.txt_embed_path, 'rb') as fin:
+            txt_idx, txt_embeds = pickle.load(fin)
+        cpu_index.add(np.array(txt_embeds, np.float32))
+        all_idx.extend(txt_idx)
+
+    if args.img_embed_path:
+        logger.info("load data from {}".format(args.img_embed_path))
+        with open(args.img_embed_path, 'rb') as fin:
+            img_idx, img_embeds = pickle.load(fin)
+        cpu_index.add(np.array(img_embeds, np.float32))
+        all_idx.extend(img_idx)
+
+    D, I = cpu_index.search(query_embeds, args.topN)
+    txt_idx_dict = {}
+    for idx in txt_idx:
+        txt_idx_dict[idx] = 1
+    assert len(query_idx) == len(I)
+
+    for step, qid in enumerate(query_idx):
+        instance = data_dict[qid]
+        if "clueweb" in args.data_path.lower():
+            pos_ids = set([instance['text_id']]+[instance['img_id']])
+        elif "webqa" in args.data_path.lower():
+            pos_ids = set(instance['txt_posFacts'] + instance['img_posFacts'])
+        else:
+            raise ("The path of data is error!")
+        neg_ids = []
+        neg_txt_ids = []
+        neg_img_ids = []
+        for idx in I[step]:
+            real_idx = all_idx[idx]
+            if real_idx not in pos_ids:
+                neg_ids.append(real_idx)
+                if real_idx in txt_idx_dict:
+                    neg_txt_ids.append(real_idx)
+                else:
+                    neg_img_ids.append(real_idx)
+            if len(neg_ids) > args.max_neg:
+                break
+        data_dict[qid]['all_negFacts'] = neg_ids
+        data_dict[qid]['img_negFacts'] = neg_img_ids
+        data_dict[qid]['txt_negFacts'] = neg_txt_ids
+    del cpu_index
+
+    logger.info("Save file!")
+    if "clueweb" in args.data_path.lower():
+        data_list = list(data_dict.values())
+        all_data = pd.DataFrame(data_list)
+        print("num of all_data:", all_data.shape[0])
+        table = pa.Table.from_pandas(all_data)
+        pq.write_table(table, args.out_path)
+    elif "webqa" in args.data_path.lower():
+        with open(args.out_path, "w") as fout:
+            for _, instance in data_dict.items():
+                fout.write(json.dumps(instance) + "\n")
+    else:
+        raise ("Tha path of data is error!")
+
+
