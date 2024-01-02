@@ -316,7 +316,7 @@ if __name__ == '__main__':
         gen_embeddings(model, query_reader, output)
 
     if args.encode_img:
-        if "clueweb" in args.cap_path.lower():
+        if "clueweb" in args.img_doc_path.lower():
             img_doc=None
             if args.img_doc_path:
                 img_doc = load_img_docs(args.img_doc_path)
