@@ -4,6 +4,7 @@ python train.py  --out_path ./checkpoint_multi_inb_clueweb/ \
 --train_path ../data/ClueWeb22-MM/train.parquet \
 --valid_path ../data/ClueWeb22-MM/dev.parquet \
 --t5_model_name OpenMatch/t5-ance \
+--pretrained_model_path ../pretrain/checkpoint_pretrain/model.best.pt \
 --text_len 128 \
 --freeze_vision_model
 

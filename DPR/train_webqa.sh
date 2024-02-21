@@ -7,5 +7,6 @@ python train.py  --out_path ./checkpoint_multi_inb_webqa/ \
 --cap_path ../data/WebQA/all_imgs.json \
 --img_feat_path ../data/WebQA/imgs.tsv \
 --img_linelist_path ../data/WebQA/imgs.lineidx.new \
+--pretrained_model_path ../pretrain/checkpoint_pretrain/model.best.pt \
 --text_len 128 \
 --freeze_vision_model

@@ -1,5 +1,5 @@
 import json
-from visual import TSVFile
+
 import logging
 import sys
 import base64
@@ -18,14 +18,19 @@ import math
 import clip
 from torch import optim
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from data import load_caps, load_docs, load_file, WebQADataset, ClueWebDataset
+from data import load_file, ClueWebDataset
 from contextlib import suppress
 from tensorboardX import SummaryWriter
 
 logger = logging.getLogger()
 import random
 import torch.nn.functional as F
-from utils import load_model,get_img_patch_token_size
+from utils import load_model, get_img_patch_token_size
+
+DEFAULT_IMAGE_PATCH_TOKEN = "<im_patch>"
+DEFAULT_IM_START_TOKEN = "<im_start>"
+DEFAULT_IM_END_TOKEN = "<im_end>"
+
 
 def convert_models_to_fp32(model):
     for p in model.parameters():
@@ -65,46 +70,35 @@ def set_seed(args):
 
 def eval_loss(model, loss_function, valid_reader, device):
     model.eval()
-    total_loss = 0.0
-    total_corr = 0.0
+    total_loss, total_loss_i, total_loss_t = 0.0, 0.0, 0.0
     counter = 0.0
     for step, batch in tqdm(enumerate(valid_reader)):
         with torch.no_grad():
-            query_embedding = model(None, batch['queries'], device)
-            candidate_embeddings = []
-            all_labels = []
-            pos_labels = [-1] * query_embedding.size(0)
+            # contrastive loss
+            batch_size = batch['img_inputs'].size(0)
             if 'img_inputs' in batch:
-                if 'img_inputs' in batch and 'img_caps' in batch:
-                    img_embeddings = model(batch['img_inputs'].cuda(), batch['img_caps'], device)
-                elif 'img_inputs' in batch and 'img_caps' not in batch:
-                    img_embeddings = model(batch['img_inputs'].cuda(), None, device)
-                candidate_embeddings.append(img_embeddings)
-                all_labels.extend(batch['img_labels'])
-            if 'txt_inputs' in batch:
-                txt_embeddings = model(None, batch['txt_inputs'], device)
-                candidate_embeddings.append(txt_embeddings)
-                all_labels.extend(batch['txt_labels'])
-            candidate_embeddings = torch.cat(candidate_embeddings, dim=0)
-            for step, idx in enumerate(all_labels):
-                if idx != -1:
-                    pos_labels[idx] = step
+                img_embeddings = model(batch['img_inputs'].cuda(), None, device)
+            if 'cap_inputs' in batch:
+                txt_embeddings = model(None, batch['cap_inputs'], device)
 
-            query_embedding = F.normalize(query_embedding, dim=-1)
-            candidate_embeddings = F.normalize(candidate_embeddings, dim=-1)
+            img_embeddings = F.normalize(img_embeddings, dim=-1)
+            txt_embeddings = F.normalize(txt_embeddings, dim=-1)
             logit_scale = model.logit_scale.exp()
-            score = torch.matmul(query_embedding, candidate_embeddings.t()) * logit_scale
+            score = torch.matmul(img_embeddings, txt_embeddings.t()) * logit_scale
+            target = torch.arange(batch_size, dtype=torch.long).cuda()
 
-            target = torch.tensor(pos_labels, dtype=torch.long).cuda()
-            loss = loss_function(score, target)
-            max_score, max_idxs = torch.max(score, 1)
-            correct_predictions_count = (max_idxs == target).sum() / query_embedding.size(0)
-            total_corr += correct_predictions_count.item()
+            loss_i = loss_function(score, target)
+            loss_t = loss_function(score.t(), target)
+            loss = (loss_i + loss_t) / 2
+
             total_loss += loss.item()
+            total_loss_i += loss_i.item()
+            total_loss_t += loss_t.item()
             counter += 1
+
     if counter == 0:
         return 0.0, 0.0
-    return total_loss / counter, total_corr / counter
+    return total_loss / counter, total_loss_i / counter, total_loss_t / counter
 
 
 def train(train_reader, valid_reader, model, device,writer:SummaryWriter):
@@ -127,81 +121,77 @@ def train(train_reader, valid_reader, model, device,writer:SummaryWriter):
     )
     scheduler = cosine_lr(optimizer, args.learning_rate, args.warmup_steps, t_total)
     loss_function = torch.nn.CrossEntropyLoss()
-    tag, global_step, global_loss, best_acc = 0, 0, 0.0, 0.0
+    tag, global_step, global_loss1, global_loss2, global_loss, best_acc, best_loss = 0, 0, 0.0, 0.0, 0.0, 0.0, float('inf')
     model.zero_grad()
     for epoch in range(int(args.num_train_epochs)):
         for step, batch in enumerate(train_reader):
             model.train()
 
-            query_embedding = model(None, batch['queries'], device)
-            candidate_embeddings = []
-            all_labels = []
-            pos_labels = [-1] * query_embedding.size(0)
-
+            batch_size=batch['img_inputs'].size(0)
             if 'img_inputs' in batch:
-                if 'img_inputs' in batch and 'img_caps' in batch:
-                    img_embeddings = model(batch['img_inputs'].cuda(), batch['img_caps'], device)
-                elif 'img_inputs' in batch and 'img_caps' not in batch:
-                    img_embeddings = model(batch['img_inputs'].cuda(), None, device)
-                candidate_embeddings.append(img_embeddings)
-                all_labels.extend(batch['img_labels'])
+                img_embeddings = model(batch['img_inputs'].cuda(), None, device)
+            if 'cap_inputs' in batch:
+                txt_embeddings = model(None, batch['cap_inputs'], device)
 
-            if 'txt_inputs' in batch:
-                txt_embeddings = model(None, batch['txt_inputs'], device)
-                candidate_embeddings.append(txt_embeddings)
-                all_labels.extend(batch['txt_labels'])
-            candidate_embeddings = torch.cat(candidate_embeddings, dim=0)
-            for step, idx in enumerate(all_labels):
-                if idx != -1:
-                    pos_labels[idx] = step
-
-            query_embedding = F.normalize(query_embedding, dim=-1)
-            candidate_embeddings = F.normalize(candidate_embeddings, dim=-1)
+            img_embeddings = F.normalize(img_embeddings, dim=-1)
+            txt_embeddings = F.normalize(txt_embeddings, dim=-1)
             logit_scale = model.logit_scale.exp()
-            score = torch.matmul(query_embedding, candidate_embeddings.t())* logit_scale
+            score = torch.matmul(img_embeddings, txt_embeddings.t())* logit_scale
+            target = torch.arange(batch_size, dtype=torch.long).cuda()
+            loss_i = loss_function(score, target)
+            loss_t = loss_function(score.t(), target)
+            loss = (loss_i + loss_t) / 2
 
-            target = torch.tensor(pos_labels, dtype=torch.long).cuda()
-            loss = loss_function(score, target)
-            max_score, max_idxs = torch.max(score, 1)
-            correct_predictions_count = (max_idxs == target).sum() / query_embedding.size(0)
             if args.gradient_accumulation_steps > 1:
                 loss = loss / args.gradient_accumulation_steps
             loss.backward()
+
             global_loss += loss.item()
+            global_loss1+=loss_i.item()
+            global_loss2 += loss_t.item()
             if (step + 1) % args.gradient_accumulation_steps == 0:
                 global_step += 1
                 scheduler(global_step)
                 convert_models_to_fp32(model)
                 optimizer.step()
+
                 model.zero_grad()
-                logger.info("Epoch: {}, global_step: {}, lr: {:.6f}, acc: {:.4f} ({:.4f}), ".format(
+                logger.info("Epoch: {}, global_step: {}, lr: {:.6f}, loss: {:.4f}(loss_i: {:.4f}, loss_t: {:.4f}) ".format(
                     epoch, global_step,
-                    optimizer.param_groups[0]["lr"], correct_predictions_count,
-                    global_loss / global_step,
+                    optimizer.param_groups[0]["lr"],
+                    global_loss / global_step, global_loss1 / global_step,global_loss2 / global_step
                 ))
-                writer.add_scalar(
-                    "training_acc",
-                    correct_predictions_count, global_step)
                 writer.add_scalar(
                     "training_loss",
                     global_loss / global_step, global_step)
+                writer.add_scalar(
+                    "training_loss_i",
+                    global_loss1 / global_step, global_step)
+                writer.add_scalar(
+                    "training_loss_t",
+                    global_loss2 / global_step, global_step)
+
                 if global_step % args.eval_steps == 0 and global_step > 0:
                     logger.info('*********Start eval loss**********')
-                    dev_loss, dev_acc = eval_loss(model, loss_function, valid_reader, device)
+                    dev_loss, dev_loss_i, dev_loss_t = eval_loss(model, loss_function, valid_reader, device)
                     logger.info(
-                        "Evaluation at global step {}, average dev loss: {:.4f}, average dev acc: {:.4f}".format(
-                            global_step, dev_loss, dev_acc))
-                    writer.add_scalar(
-                        "dev_acc",
-                        dev_acc, global_step)
+                        "Evaluation at global step {}, average dev loss: {:.4f}, average dev loss_i: {:.4f}, average dev loss_t: {:.4f}".format(
+                            global_step, dev_loss, dev_loss_i, dev_loss_t))
                     writer.add_scalar(
                         "dev_loss",
                         dev_loss, global_step)
-                    if best_acc <= dev_acc:
-                        best_acc = dev_acc
+                    writer.add_scalar(
+                        "dev_loss_i",
+                        dev_loss_i, global_step)
+                    writer.add_scalar(
+                        "dev_loss_t",
+                        dev_loss_t, global_step)
+
+                    if best_loss >= dev_loss:
+                        best_loss = dev_loss
                         torch.save({'epoch': epoch,
                                     'model': model.state_dict()}, os.path.join(args.out_path, "model.best.pt"))
-                        logger.info("Saved best epoch {0}, best acc {1}".format(epoch, best_acc))
+                        logger.info("Saved best epoch {0}, best loss {1}".format(epoch, best_loss))
                         tag = 0
                     else:
                         tag += 1
@@ -225,6 +215,7 @@ if __name__ == '__main__':
     parser.add_argument("--img_feat_path", type=str)
     parser.add_argument("--img_linelist_path", type=str)
     parser.add_argument("--text_len", type=int, default=128)
+    parser.add_argument("--cap_len", type=int, default=128)
     parser.add_argument('--select_layer',type=int,default=-1)
 
     parser.add_argument("--only_txt", action='store_true', default=False)
@@ -232,6 +223,9 @@ if __name__ == '__main__':
     parser.add_argument("--freeze_language_model",action='store_true',default=False)
     parser.add_argument("--freeze_vision_model", action='store_true', default=False)
     parser.add_argument("--freeze_vision_language_model",action='store_true',default=False)
+    parser.add_argument('--use_gen',action='store_true',default=False)
+    parser.add_argument('--only_image_caption_contrastive_loss',action='store_true',default=False)
+    parser.add_argument('--use_it_ic', action='store_true', default=False)
 
     parser.add_argument("--num_workers", type=int, default=5)
     parser.add_argument("--seed", type=int, default=1234)
@@ -257,24 +251,19 @@ if __name__ == '__main__':
     set_seed(args)
     tb_writer = SummaryWriter(log_dir=args.out_path)
 
-    if args.only_txt:
-        train_data = load_file(args.train_path, img=False)
-        valid_data = load_file(args.valid_path, img=False)
-    elif args.only_img:
-        train_data = load_file(args.train_path, txt=False)
-        valid_data = load_file(args.valid_path, txt=False)
-    else:
-        train_data = load_file(args.train_path)
-        valid_data = load_file(args.valid_path)
 
+    train_data = load_file(args.train_path)
+    valid_data = load_file(args.valid_path)
 
     tokenizer, model, image_processor = load_model(args,device)
 
+
+    tmp = list(model.named_parameters())
+    params_no_grad = [n for n, p in model.named_parameters() if not p.requires_grad]
+    params_need_grad = [n for n, p in model.named_parameters() if p.requires_grad]
     if args.freeze_language_model:
         for n,p in model.t5_model.named_parameters():
             p.requires_grad=False
-            if 'shared.weight' in n:
-                p.requires_grad=True
     if args.freeze_vision_model:
         for n,p in model.clip_model.named_parameters():
             p.requires_grad=False
@@ -284,36 +273,22 @@ if __name__ == '__main__':
             if 'projector' in n:
                 p.requires_grad=True
 
-    img_patch_token_size=get_img_patch_token_size(args.clip_model_name)
-    if "clueweb" in args.train_path.lower():
-        train_data = ClueWebDataset(args, image_processor, tokenizer, train_data, shuffle=True,img_special_len=img_patch_token_size)
-        train_sampler = RandomSampler(train_data)
-        traindata_reader = DataLoader(dataset=train_data, sampler=train_sampler, num_workers=args.num_workers,
-                                      batch_size=args.train_batch_size, collate_fn=train_data.Collector, drop_last=True)
-        valid_data = ClueWebDataset(args, image_processor, tokenizer, valid_data, shuffle=False,img_special_len=img_patch_token_size)
-        valid_sampler = SequentialSampler(valid_data)
-        validdata_reader = DataLoader(dataset=valid_data, sampler=valid_sampler, num_workers=args.num_workers,
-                                      batch_size=args.valid_batch_size, collate_fn=valid_data.Collector, drop_last=False)
-    elif "webqa" in args.train_path.lower():
-        docs = load_docs(args.doc_path)
-        captions = None
-        if args.cap_path:
-            captions = load_caps(args.cap_path)
+    params_no_grad_new = [n for n, p in model.named_parameters() if not p.requires_grad]
+    params_need_grad_new = [n for n, p in model.named_parameters() if p.requires_grad]
 
-        train_data = WebQADataset(args, image_processor, tokenizer, train_data, docs, captions=captions, shuffle=True,
-                                  img_special_len=img_patch_token_size)
-        train_sampler = RandomSampler(train_data)
-        traindata_reader = DataLoader(dataset=train_data, sampler=train_sampler, num_workers=args.num_workers,
-                                      batch_size=args.train_batch_size, collate_fn=train_data.Collector, drop_last=True)
-        valid_data = WebQADataset(args, image_processor, tokenizer, valid_data, docs, captions=captions, shuffle=False,
-                                  img_special_len=img_patch_token_size)
-        valid_sampler = SequentialSampler(valid_data)
-        validdata_reader = DataLoader(dataset=valid_data, sampler=valid_sampler, num_workers=args.num_workers,
-                                      batch_size=args.valid_batch_size, collate_fn=valid_data.Collector, drop_last=False)
-    else:
-        raise ("The path of data is error!")
+    img_patch_token_size=get_img_patch_token_size(args.clip_model_name)
+
+    train_data = ClueWebDataset(args, image_processor, tokenizer, train_data, shuffle=True,img_special_len=img_patch_token_size)
+    train_sampler = RandomSampler(train_data)
+    traindata_reader = DataLoader(dataset=train_data, sampler=train_sampler, num_workers=args.num_workers,
+                                  batch_size=args.train_batch_size, collate_fn=train_data.Collector, drop_last=True)
+    valid_data = ClueWebDataset(args, image_processor, tokenizer, valid_data, shuffle=False,img_special_len=img_patch_token_size)
+    valid_sampler = SequentialSampler(valid_data)
+    validdata_reader = DataLoader(dataset=valid_data, sampler=valid_sampler, num_workers=args.num_workers,
+                                  batch_size=args.valid_batch_size, collate_fn=valid_data.Collector, drop_last=False)
+
     if args.pretrained_model_path != None:
         logger.info('loading checkpoint from {}'.format(args.pretrained_model_path))
-        model.load_state_dict(torch.load(args.pretrained_model_path)['model'],strict=False)
+        model.load_state_dict(torch.load(args.pretrained_model_path)['model'])
     model.cuda()
     train(traindata_reader, validdata_reader, model, device,tb_writer)
