@@ -7,6 +7,13 @@ Click the links below to view our papers and checkpoints
 
  If you find this work useful, please cite our paper  and give us a shining star 🌟
 
+## Overview
+
+MARVEL unlocks the multi-modal capability of dense retrieval via visual module plugin. It encodes queries and multi-modal documents with a unified encoder model to bridge the modality gap between images and texts, conducts retrieval, modality routing, and result fusion within a unified embedding space.
+
+<p align="center">
+  <img align="middle" src="image/marvel.gif" height="350" alt="MARVEL"/>
+</p>
 
 ## Requirement
 **1. Install the following packages using Pip or Conda under this environment**
