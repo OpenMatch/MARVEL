@@ -13,7 +13,7 @@ https://www.lemurproject.org/clueweb22/obtain.php
 
 ## Quick Start
 
-If you have obtained the copyright license of the data set, you can build ClueWeb22-MM through the following script.
+If you have obtained the copyright license of the ClueWeb22 dataset, you can build ClueWeb22-MM through the following script.
 
 #### Retrieval Benchmark
 
