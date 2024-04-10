@@ -45,7 +45,7 @@ If you have obtained the copyright license of the data set, you can build ClueWe
 
 #### Reproduce
 
-We provide a comparison file containing query, Clueweb ID and image Node ID for easy reproduction. [Link]()
+We provide a comparison file containing query, Clueweb ID and image Node ID for easy reproduction. [Link](https://drive.google.com/file/d/1-YpszaRx_sEBLITh_BY_R42SmkGrcvXx/view?usp=sharing)
 
 At the same time, please feel free to contact us if you have any questions about the dataset.
 ```
