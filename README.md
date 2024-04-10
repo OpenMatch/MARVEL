@@ -70,12 +70,12 @@ data/
 ### Train MARVEL-ANCE
 **Using the WebQA dataset as an example, I will show you how to reproduce the results in the MARVEL paper. The same is true for the ClueWeb22-MM dataset. Also, we provide the checkpoint for each step. You can skip a step and continue training.**
 
-* First step: Go to the ``pretrain`` folder and pretrain MARVEL's visual module:
+* First step: Go to the ``pretrain`` folder and pretrain MARVEL's visual module [checkpoint](https://huggingface.co/OpenMatch/marvel-pretrain):
 ```
 cd pretrain
 bash train.sh
 ```
-* Second step: Go to the ``DPR`` folder and train MARVEL-DPR using inbatch negatives:
+* Second step: Go to the ``DPR`` folder and train MARVEL-DPR using inbatch negatives [checkpoint](https://huggingface.co/OpenMatch/marvel-dpr-webqa):
 ```
 cd DPR
 bash train_webqa.sh
@@ -84,7 +84,7 @@ bash train_webqa.sh
 ```
 bash get_hn_webqa.sh
 ```
-* Final step: Go to the ``ANCE`` folder and train MARVEL-ANCE using hard negatives: 
+* Final step: Go to the ``ANCE`` folder and train MARVEL-ANCE using hard negatives [checkpoint](https://huggingface.co/OpenMatch/marvel-ance-webqa): 
 ```
 cd ANCE
 bash train_ance_webqa.sh
