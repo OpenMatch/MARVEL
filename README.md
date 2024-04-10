@@ -43,7 +43,7 @@ git clone https://github.com/OpenMatch/MARVEL
 cd MARVEL
 ```
 * Download link for our WebQA: [WebQA](https://thunlp.oss-cn-qingdao.aliyuncs.com/UniVLDR/data.zip).
-* Please refer to the ClueWeb22-MM folder to obtain pretrain data and retrieval benchmark.
+* Please refer to [ClueWeb22-MM](https://github.com/OpenMatch/MARVEL/tree/main/ClueWeb22-MM) to obtain pretrain data and retrieval benchmark.
 * Please make sure that the files under the data folder contain the following before running:
 ```
 data/
