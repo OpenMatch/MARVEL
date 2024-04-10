@@ -68,7 +68,7 @@ data/
     └── dev.parquet
 ```
 ### Train MARVEL-ANCE
-**Using the WebQA dataset as an example, I will show you how to reproduce the results in the MARVEL paper. The same is true for the ClueWeb22-MM dataset.**
+**Using the WebQA dataset as an example, I will show you how to reproduce the results in the MARVEL paper. The same is true for the ClueWeb22-MM dataset. Also, we provide the checkpoint for each step. You can skip a step and continue training.**
 
 * First step: Go to the ``pretrain`` folder and pretrain MARVEL's visual module:
 ```
