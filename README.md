@@ -42,7 +42,8 @@ MARVEL is built on [CLIP](https://huggingface.co/openai/clip-vit-base-patch32) a
 git clone https://github.com/OpenMatch/MARVEL
 cd MARVEL
 ```
-* Download link for our WebQA: [WebQA](https://thunlp.oss-cn-qingdao.aliyuncs.com/UniVLDR/data.zip). If you want to use our ClueWeb22-MM and pretrain data, please obtain ClueWeb license first and contact us by email.
+* Download link for our WebQA: [WebQA](https://thunlp.oss-cn-qingdao.aliyuncs.com/UniVLDR/data.zip).
+* Please refer to the ClueWeb22-MM folder to obtain pretrain data and retrieval benchmark.
 * Please make sure that the files under the data folder contain the following before running:
 ```
 data/
