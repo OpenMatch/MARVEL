@@ -1,11 +1,20 @@
 #  MARVEL: Unlocking the Multi-Modal Capability of Dense Retrieval via Visual Module Plugin
-Source code for our paper : [MARVEL: Unlocking the Multi-Modal Capability of Dense Retrieval via Visual Module Plugin](https://arxiv.org/abs/2310.14037)
+Source code for our ACL 2024 paper : [MARVEL: Unlocking the Multi-Modal Capability of Dense Retrieval via Visual Module Plugin](https://arxiv.org/abs/2310.14037)
 
 Click the links below to view our papers and checkpoints
 
 <a href='https://arxiv.org/abs/2310.14037'><img src='https://img.shields.io/badge/Paper-Arxiv-red'></a><a href='https://huggingface.co/OpenMatch/marvel-pretrain'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Pretrain-blue'><a href='https://huggingface.co/OpenMatch/marvel-dpr-webqa'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_DPR-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-dpr-clueweb'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_DPR-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-ance-webqa'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-WebQA_ANCE-blue'></a><a href='https://huggingface.co/OpenMatch/marvel-ance-clueweb'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ClueWeb22_MM_ANCE-blue'></a>
 
  If you find this work useful, please cite our paper  and give us a shining star 🌟
+
+```
+@article{zhou2023unlock,
+ title={Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin},
+ author={Zhou, Tianshuo and Mei, Sen and Li, Xinze and Liu, Zhenghao and Xiong, Chenyan and Liu, Zhiyuan and Gu, Yu and Yu, Ge},
+ journal={arXiv preprint arXiv:2310.14037},
+ year={2023}
+}
+```
 
 ## Overview
 
