@@ -11,7 +11,7 @@ Click the links below to view our papers and checkpoints
 @article{zhou2023unlock,
  title={Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin},
  author={Zhou, Tianshuo and Mei, Sen and Li, Xinze and Liu, Zhenghao and Xiong, Chenyan and Liu, Zhiyuan and Gu, Yu and Yu, Ge},
- journal={Proceedings of ACL},
+ booktitle={The 62nd Annual Meeting of the Association for Computational Linguistics},
  year={2023}
 }
 ```
