@@ -19,14 +19,14 @@ If you have obtained the copyright license of the ClueWeb22 dataset, you can bui
 
 |Step|Script|Introduction|
 |--|:-----|:-----|
-|0|gen_image_text_pair.py|Save the url, caption, and surrouding text of the image from the original ClueWeb22 web page|
-|1|first_filter_image_text_pair.py|Processing of image_url side: only keep jpg/png/jpeg, and exclude urls containing tlogo, button, icon, plugin, widget|
+|0|get_raw_data.py|Save the url, caption, and surrouding text of the image from the original ClueWeb22 web page|
+|1|first_filter.py|Processing of image_url side: only keep jpg/png/jpeg, and exclude urls containing tlogo, button, icon, plugin, widget|
 |2|second_filter.py|Deduplication based on image URL|
-|3|third_filter_image_text_pair.py|Merge parquet files|
-|4|pre_data.py|Save the url, caption, and surrouding text of the image from the original ClueWeb22 web page|
+|3|merge_raw_data.py|Merge parquet files|
+|4|remove_error_image.py|Save the url, caption, and surrouding text of the image from the original ClueWeb22 web page|
 |5|gen_anchor.py|Generate anchor text as query for each document|
 |6|filter_by_ance.py|Use T5-ANCE to encode the query and caption, and filter out the data containing filter_out_keyword_set in the query|
-|7|get_trec.py|Keep the retrieved top files|
+|7|save_top_data.py|Keep the retrieved top files|
 |8|construct_new_clueweb_data.py|Based on the retrieved top file and filter_out_keyword_set, filter out the data sets for training and testing|
 |9|sample_one_label.py|Ensure that each query corresponds to a label, and the text img mode of the label is close to 1:1|
 |10|remove_datasets_duplicate.py|Unify the IDs in the data set to prevent the phenomenon of having the same content but different IDs|
