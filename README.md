@@ -8,11 +8,11 @@ Click the links below to view our papers and checkpoints
  If you find this work useful, please cite our paper  and give us a shining star 🌟
 
 ```
-@article{zhou2023unlock,
- title={Unlock Multi-Modal Capability of Dense Retrieval via Visual Module Plugin},
+@article{zhou2024marvel,
+ title={MARVEL: Unlocking the Multi-Modal Capability of Dense Retrieval via Visual Module Plugin},
  author={Zhou, Tianshuo and Mei, Sen and Li, Xinze and Liu, Zhenghao and Xiong, Chenyan and Liu, Zhiyuan and Gu, Yu and Yu, Ge},
  booktitle={The 62nd Annual Meeting of the Association for Computational Linguistics},
- year={2023}
+ year={2024}
 }
 ```
 
